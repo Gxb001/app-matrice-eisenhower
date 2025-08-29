@@ -30,8 +30,10 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({task, onClose}) => {
                         <p><strong>Statut :</strong> {task.status}</p>
                         <p><strong>Urgence :</strong> {task.urgency}</p>
                         <p><strong>Importance :</strong> {task.importance}</p>
-                        {task.plan_date && <p><strong>Date de planification :</strong> {new Date(task.plan_date).toLocaleDateString('fr-FR')}</p>}
-                        {task.estimation && <p><strong>Estimation :</strong> {task.estimation} {task.estimation_unit}</p>}
+                        {task.plan_date && <p><strong>Date de planification
+                            :</strong> {new Date(task.plan_date).toLocaleDateString('fr-FR')}</p>}
+                        {task.estimation &&
+                            <p><strong>Estimation :</strong> {task.estimation} {task.estimation_unit}</p>}
                         <p><strong>Créé le :</strong> {new Date(task.created_at).toLocaleDateString('fr-FR')}</p>
                     </div>
                 </div>

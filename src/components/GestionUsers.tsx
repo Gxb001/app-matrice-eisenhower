@@ -60,9 +60,6 @@ const GestionUsers: React.FC = () => {
         if (!assignUserId || !selectedProjectId) return;
 
         try {
-            // Récupérer le token depuis ton AuthContext
-            const token = localStorage.getItem("token"); // ou depuis useAuth()
-
             await axios.post(
                 `${API_BASE_URL}/user-projects`,
                 {
@@ -76,14 +73,21 @@ const GestionUsers: React.FC = () => {
                 }
             );
 
-            // Reset de la sélection
             setAssignUserId(null);
             setSelectedProjectId(null);
         } catch (err) {
-            const errorMessage =
-                axios.isAxiosError(err) && err.response
-                    ? `Erreur: ${err.response.status} ${err.response.statusText}`
-                    : "Erreur lors de l'assignation de l'utilisateur.";
+            let errorMessage = "Erreur lors de l'assignation de l'utilisateur.";
+
+            if (axios.isAxiosError(err) && err.response) {
+                if (err.response.data?.error) {
+                    // Message backend
+                    errorMessage = err.response.data.error;
+                } else {
+                    // Fallback sur status
+                    errorMessage = `Erreur: ${err.response.status} ${err.response.statusText}`;
+                }
+            }
+
             setError(errorMessage);
         }
     };

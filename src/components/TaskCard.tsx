@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import TaskDetailsModal from './TaskDetailsModal';
-import { Task } from '../types';
-import { Calendar, Clock, Edit, Tag, Trash2, User } from 'lucide-react';
+import {Task} from '../types';
+import {Calendar, Clock, Edit, Tag, Trash2, User} from 'lucide-react';
 
 interface TaskCardProps {
     task: Task;
@@ -9,7 +9,7 @@ interface TaskCardProps {
     onDelete: (taskId: number) => void;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
+const TaskCard: React.FC<TaskCardProps> = ({task, onEdit, onDelete}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleCardClick = () => {
@@ -61,7 +61,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
                             className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-colors"
                             title="Modifier"
                         >
-                            <Edit className="w-4 h-4" />
+                            <Edit className="w-4 h-4"/>
                         </button>
                         <button
                             onClick={(e) => {
@@ -71,7 +71,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
                             className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-colors"
                             title="Supprimer"
                         >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4"/>
                         </button>
                     </div>
                 </div>
@@ -82,21 +82,22 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
                         {task.status}
                     </span>
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 flex items-center">
-                        <Tag className="w-3 h-3 mr-1" />
+                    <span
+                        className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 flex items-center">
+                        <Tag className="w-3 h-3 mr-1"/>
                         {task.urgency} & {task.importance}
                     </span>
                 </div>
                 <div className="space-y-2 text-sm text-gray-600">
                     {task.plan_date && (
                         <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-2" />
+                            <Calendar className="w-4 h-4 mr-2"/>
                             <span>Planifié pour le {formatDate(task.plan_date)}</span>
                         </div>
                     )}
                     {task.estimation && (
                         <div className="flex items-center">
-                            <Clock className="w-4 h-4 mr-2" />
+                            <Clock className="w-4 h-4 mr-2"/>
                             <span>Estimation: {formatEstimation(task.estimation, task.estimation_unit)}</span>
                         </div>
                     )}
@@ -104,13 +105,13 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete }) => {
                 {task.created_at && (
                     <div className="mt-3 pt-3 border-t border-gray-100">
                         <div className="flex items-center text-xs text-gray-500">
-                            <User className="w-3 h-3 mr-1" />
+                            <User className="w-3 h-3 mr-1"/>
                             <span>Créé le {formatDate(task.created_at)}</span>
                         </div>
                     </div>
                 )}
             </div>
-            {isModalOpen && <TaskDetailsModal task={task} onClose={handleCloseModal} />}
+            {isModalOpen && <TaskDetailsModal task={task} onClose={handleCloseModal}/>}
         </>
     );
 };

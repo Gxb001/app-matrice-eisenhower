@@ -1,53 +1,65 @@
-import React, {useEffect, useState} from 'react';
-import {MatrixData, Project, Task, TaskFormData} from '../types';
-import {API_BASE_URL, useAuth} from '../contexts/AuthContext';
-import TaskCard from './TaskCard';
-import TaskForm from './TaskForm';
-import ProjectSelector from './ProjectSelector';
-import {AlertCircle, Archive, CheckCircle, Clock, FolderOpen, Plus} from 'lucide-react';
-import axios from 'axios';
+import React, {useEffect, useState} from "react";
+import {MatrixData, Project, Task, TaskFormData} from "../types";
+import {API_BASE_URL, useAuth} from "../contexts/AuthContext";
+import TaskCard from "./TaskCard";
+import TaskForm from "./TaskForm";
+import ProjectSelector from "./ProjectSelector";
+import {AlertCircle, Archive, CheckCircle, Clock, FolderOpen, Plus,} from "lucide-react";
+import axios from "axios";
 
 const Matrix: React.FC = () => {
     const [matrixData, setMatrixData] = useState<MatrixData>({
         urgent_important: [],
         urgent_non_important: [],
         non_urgent_important: [],
-        non_urgent_non_important: []
+        non_urgent_non_important: [],
     });
     const [projects, setProjects] = useState<Project[]>([]);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
 
-    const {user} = useAuth();
+    const {user, token} = useAuth();
 
+    /** Charger les projets de l’utilisateur */
     const fetchProjects = async () => {
-        if (!user) return;
+        if (!user || !token) return;
 
         try {
-            const response = await axios.get(`${API_BASE_URL}/users/${user.id}/projects`);
+            const response = await axios.get(
+                `${API_BASE_URL}/users/${user.id}/projects`,
+                {
+                    headers: {Authorization: `Bearer ${token}`},
+                }
+            );
             setProjects(response.data);
             if (response.data.length > 0 && !selectedProject) {
                 setSelectedProject(response.data[0]);
             }
         } catch (err: any) {
-            console.error('Error fetching projects:', err);
-            setError('Erreur lors du chargement des projets');
+            console.error("Error fetching projects:", err);
+            setError("Erreur lors du chargement des projets");
         }
     };
 
+    /** Charger les tâches dans la matrice */
     const fetchMatrixData = async () => {
-        if (!user) return;
+        if (!user || !token) return;
 
         try {
             setIsLoading(true);
-            const response = await axios.get(`${API_BASE_URL}/tasks/matrix/${user.id}`);
+            const response = await axios.get(
+                `${API_BASE_URL}/tasks/matrix/${user.id}`,
+                {
+                    headers: {Authorization: `Bearer ${token}`},
+                }
+            );
             setMatrixData(response.data);
         } catch (err: any) {
-            setError('Erreur lors du chargement de la matrice');
-            console.error('Error fetching matrix data:', err);
+            setError("Erreur lors du chargement de la matrice");
+            console.error("Error fetching matrix data:", err);
         } finally {
             setIsLoading(false);
         }
@@ -66,45 +78,57 @@ const Matrix: React.FC = () => {
         }
     }, [selectedProject]);
 
+    /** Créer une tâche */
     const handleCreateTask = async (formData: TaskFormData) => {
-        if (!user || !selectedProject) return;
+        if (!user || !selectedProject || !token) return;
 
         try {
-            await axios.post(`${API_BASE_URL}/tasks`, {
-                ...formData,
-                id_project: selectedProject.id
-            });
+            await axios.post(
+                `${API_BASE_URL}/tasks`,
+                {...formData, id_project: selectedProject.id},
+                {headers: {Authorization: `Bearer ${token}`}}
+            );
             fetchMatrixData();
         } catch (err: any) {
-            setError('Erreur lors de la création de la tâche');
-            console.error('Error creating task:', err);
+            setError("Erreur lors de la création de la tâche");
+            console.error("Error creating task:", err);
         }
     };
 
+    /** Mettre à jour une tâche */
     const handleUpdateTask = async (formData: TaskFormData) => {
-        if (!editingTask) return;
+        if (!editingTask || !token) return;
 
         try {
-            await axios.put(`${API_BASE_URL}/tasks/${editingTask.id}`, formData);
+            await axios.put(
+                `${API_BASE_URL}/tasks/${editingTask.id}`,
+                formData,
+                {headers: {Authorization: `Bearer ${token}`}}
+            );
             setEditingTask(null);
             fetchMatrixData();
         } catch (err: any) {
-            setError('Erreur lors de la modification de la tâche');
-            console.error('Error updating task:', err);
+            setError("Erreur lors de la modification de la tâche");
+            console.error("Error updating task:", err);
         }
     };
 
+    /** Supprimer une tâche */
     const handleDeleteTask = async (taskId: number) => {
-        if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
+        if (!token) return;
+
+        if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette tâche ?")) {
             return;
         }
 
         try {
-            await axios.delete(`${API_BASE_URL}/tasks/${taskId}`);
+            await axios.delete(`${API_BASE_URL}/tasks/${taskId}`, {
+                headers: {Authorization: `Bearer ${token}`},
+            });
             fetchMatrixData();
         } catch (err: any) {
-            setError('Erreur lors de la suppression de la tâche');
-            console.error('Error deleting task:', err);
+            setError("Erreur lors de la suppression de la tâche");
+            console.error("Error deleting task:", err);
         }
     };
 
@@ -124,33 +148,33 @@ const Matrix: React.FC = () => {
     const getQuadrantConfig = (quadrant: keyof MatrixData) => {
         const configs = {
             urgent_important: {
-                title: 'Urgent & Important',
-                subtitle: 'Faire en premier',
-                color: 'bg-red-50 border-red-200',
-                headerColor: 'bg-red-500',
-                icon: AlertCircle
+                title: "Urgent & Important",
+                subtitle: "Faire en premier",
+                color: "bg-red-50 border-red-200",
+                headerColor: "bg-red-500",
+                icon: AlertCircle,
             },
             non_urgent_important: {
-                title: 'Non Urgent & Important',
-                subtitle: 'Planifier',
-                color: 'bg-green-50 border-green-200',
-                headerColor: 'bg-green-500',
-                icon: CheckCircle
+                title: "Non Urgent & Important",
+                subtitle: "Planifier",
+                color: "bg-green-50 border-green-200",
+                headerColor: "bg-green-500",
+                icon: CheckCircle,
             },
             urgent_non_important: {
-                title: 'Urgent & Non Important',
-                subtitle: 'Déléguer',
-                color: 'bg-orange-50 border-orange-200',
-                headerColor: 'bg-orange-500',
-                icon: Clock
+                title: "Urgent & Non Important",
+                subtitle: "Déléguer",
+                color: "bg-orange-50 border-orange-200",
+                headerColor: "bg-orange-500",
+                icon: Clock,
             },
             non_urgent_non_important: {
-                title: 'Non Urgent & Non Important',
-                subtitle: 'Éliminer',
-                color: 'bg-gray-50 border-gray-200',
-                headerColor: 'bg-gray-500',
-                icon: Archive
-            }
+                title: "Non Urgent & Non Important",
+                subtitle: "Éliminer",
+                color: "bg-gray-50 border-gray-200",
+                headerColor: "bg-gray-500",
+                icon: Archive,
+            },
         };
         return configs[quadrant];
     };
@@ -172,24 +196,27 @@ const Matrix: React.FC = () => {
                             </div>
                         </div>
                         <span className="bg-white/20 text-xs px-2 py-1 rounded-full">
-              {quadrantTasks.length}
-            </span>
+            {quadrantTasks.length}
+          </span>
                     </div>
                 </div>
 
                 <div className="flex-1 p-4">
-                    <div className="space-y-3">
+                    {/* 2 par ligne (1 sur mobile) */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {quadrantTasks.map(task => (
-                            <TaskCard
-                                key={task.id}
-                                task={task}
-                                onEdit={handleEditTask}
-                                onDelete={handleDeleteTask}
-                            />
+                            <div key={task.id} className="h-full">
+                                <TaskCard
+                                    task={task}
+                                    onEdit={handleEditTask}
+                                    onDelete={handleDeleteTask}
+                                />
+                            </div>
                         ))}
+
                         {quadrantTasks.length === 0 && (
-                            <div className="text-center py-8 text-gray-500">
-                                <p className="text-sm">Aucune tâche dans ce quadrant</p>
+                            <div className="col-span-1 md:col-span-2 text-center py-8 text-gray-500">
+                                <p className="text-sm">Aucune tÃ¢che dans ce quadrant</p>
                             </div>
                         )}
                     </div>
@@ -215,14 +242,20 @@ const Matrix: React.FC = () => {
                 <div className="mb-8">
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Matrice d'Eisenhower</h1>
-                            <p className="text-gray-600 mt-1">Organisez vos tâches par priorité</p>
+                            <h1 className="text-3xl font-bold text-gray-900">
+                                Matrice d'Eisenhower
+                            </h1>
+                            <p className="text-gray-600 mt-1">
+                                Organisez vos tâches par priorité
+                            </p>
                         </div>
                         <div className="flex items-center space-x-4">
                             {selectedProject && (
                                 <div className="flex items-center bg-white px-4 py-2 rounded-lg shadow-sm border">
                                     <FolderOpen className="w-5 h-5 text-blue-600 mr-2"/>
-                                    <span className="font-medium text-gray-900">{selectedProject.name}</span>
+                                    <span className="font-medium text-gray-900">
+                    {selectedProject.name}
+                  </span>
                                 </div>
                             )}
                             <button
@@ -247,7 +280,10 @@ const Matrix: React.FC = () => {
 
                     {projects.length === 0 && (
                         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-yellow-700 mb-6">
-                            <p>Aucun projet trouvé. Vous devez être associé à un projet pour voir les tâches.</p>
+                            <p>
+                                Aucun projet trouvé. Vous devez être associé à un projet pour
+                                voir les tâches.
+                            </p>
                         </div>
                     )}
                 </div>

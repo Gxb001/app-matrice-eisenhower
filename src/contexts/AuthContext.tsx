@@ -33,7 +33,7 @@ interface AuthProviderProps {
 }
 
 // Configuration de l'API base URL
-export const API_BASE_URL = 'http://localhost:5000/api';
+export const API_BASE_URL = 'http://10.29.17.165:5000/api';
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     const [user, setUser] = useState<User | null>(null);
