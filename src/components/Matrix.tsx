@@ -46,24 +46,49 @@ const Matrix: React.FC = () => {
 
     /** Charger les tâches dans la matrice */
     const fetchMatrixData = async () => {
-        if (!user || !token) return;
+        if (!user || !token || !selectedProject) return;
 
         try {
             setIsLoading(true);
             const response = await axios.get(
-                `${API_BASE_URL}/tasks/matrix/${user.id}`,
+                `${API_BASE_URL}/tasks/project/${selectedProject.id}`,
                 {
                     headers: {Authorization: `Bearer ${token}`},
                 }
             );
-            setMatrixData(response.data);
+
+            const tasks: Task[] = response.data;
+
+            // Transformer en matrice
+            const newMatrix: MatrixData = {
+                urgent_important: [],
+                urgent_non_important: [],
+                non_urgent_important: [],
+                non_urgent_non_important: [],
+            };
+
+            tasks.forEach((task) => {
+                if (task.urgency && task.importance) {
+                    newMatrix.urgent_important.push(task);
+                } else if (task.urgency && !task.importance) {
+                    newMatrix.urgent_non_important.push(task);
+                } else if (!task.urgency && task.importance) {
+                    newMatrix.non_urgent_important.push(task);
+                } else {
+                    newMatrix.non_urgent_non_important.push(task);
+                }
+            });
+
+            setMatrixData(newMatrix);
+
         } catch (err: any) {
             setError("Erreur lors du chargement de la matrice");
-            console.error("Error fetching matrix data:", err);
+            console.error("Error fetching project tasks:", err);
         } finally {
             setIsLoading(false);
         }
     };
+
 
     useEffect(() => {
         if (user) {
