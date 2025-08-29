@@ -34,7 +34,6 @@ const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({task, onClose}) => {
                             :</strong> {new Date(task.plan_date).toLocaleDateString('fr-FR')}</p>}
                         {task.estimation &&
                             <p><strong>Estimation :</strong> {task.estimation} {task.estimation_unit}</p>}
-                        <p><strong>Créé le :</strong> {new Date(task.created_at).toLocaleDateString('fr-FR')}</p>
                     </div>
                 </div>
             </div>
